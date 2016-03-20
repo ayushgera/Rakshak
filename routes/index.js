@@ -7,6 +7,10 @@ router.get('/', function(req, res, next) {
   res.send("*******EUREKA******");
 });
 
+router.get('/alert', function(req, res, next){
+  res.send("SEND ALERT");
+});
+
 var entryRouter= function(app){
 	app.use("/",router);
 }
