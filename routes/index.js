@@ -3,8 +3,12 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  console.log("*******EUREKA******");
+  console.log("*******ENTRY POINT******");
   res.send("*******EUREKA******");
 });
 
-module.exports = router;
+var entryRouter= function(app){
+	app.use("/",router);
+}
+
+module.exports = entryRouter;
