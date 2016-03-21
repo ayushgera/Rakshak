@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var data = require('../model/data');
+var data = require('../model/data'); //TODO: replace with dbService
 
 /* GET home page. */
 /*router.get('/', function(req, res, next) {
@@ -21,7 +21,10 @@ router.post('/responders', function(req, res) {
 	//if (data.responders[req.body.id]) {
 	//	res.send('Conflict', 409); 
 	//} else {
-		data.responders.push(req.body);
+		//TODO: check if it already exists in db, if not add responder to db
+		data.responders.push(req.body.responder);
+		//TODO: register responder to the type of servie he opts to, using responderRegisterService
+		//registerResponder(req.body.serviceType, req.body.responder);
 		res.redirect('/responders'); 
 	//}
 });
