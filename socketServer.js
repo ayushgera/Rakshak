@@ -1,6 +1,7 @@
 var responderFinder= require("./services/responderFinderService");
 var alerters=[];
 var responders=[];
+var respondingResponders=[];
 var incidents=[];
 
 /**
@@ -24,9 +25,10 @@ var incidents=[];
  *
  * "respond"                            do-nothing                                  send- respond                     on- save responder, give id/name
  *                                                                                                                    start tracker service
+ * 
  * "responder-dispatch-status"          on- update marker                           on- update marker                 send- responder-dispatch-status
  *
- * "finish-respond"                                                                 send- finish-respond              on- send you-are-served
+ * "finish-respond"                     do-nothing                                  send- finish-respond              on- send you-are-served
  *
  * "you-are-saved"                      on- update marker                           do nothing/update marker          send you-are-served
  *
@@ -59,15 +61,15 @@ module.exports= function(io){
 
       //TODO: set alerter id/name, saved with alerters.push in global alerters array, can be accessed later
 
-      alerter.emit("new-incident",incidents);
+      io.sockets.emit("new-incident",data);
 
       alerters.push(alerter);
 
       console.log("!!!!!ALERT!!!!!!!");
       // alert all alerters that an incident has been reported
       // client alerter will use it to see if an event is already reported here
-      alerters.broadcast.emit('incident-location', data);
-      responders.broadcast.emit('incident-location', data);
+      //alerters.broadcast.emit('incident-location', data);
+      //responders.broadcast.emit('incident-location', data);
       //TODO:
       //generate alerter id
       //store location, severity in db, with alerter id 
@@ -77,8 +79,11 @@ module.exports= function(io){
       //call responderfinder service, which returns array of closest reponders
       var nearResponders=[];
       nearResponders.push(responderFinder(data, responders));
-
-      nearResponders.emit("respond-to-incident");
+      //TODO: make synchronous
+      nearResponders.emit("please-respond",data);
+      //TODO: responders - near Responders
+      responders.emit("found-responders",data);
+      alerter.emit("found-responders",data);
       //broadcast this location and event type to all returned responders
     });
   });
@@ -89,6 +94,11 @@ module.exports= function(io){
 
     responders.push(responder);
     responder.on('respond', function (data) {
+      respondingResponders.push(responder);
+      // responderTrackingService
+      // extract alerter by name
+      // setTimeOut(function(){responder.emit("responder-dispatch-status");},5000);
+      // alerter.emit("responder-dispatch-status");
       console.log("!!!!!RESPOND!!!!!!!");
     });
   });
