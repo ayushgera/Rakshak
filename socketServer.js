@@ -5,18 +5,35 @@ var incidents=[];
 
 /**
  * Events identified:
- * "all-incidents"
- * "alert"
- * "found-responders"
- * "please-respond"
- * "respond"
- * "responder-dispatch-status"
- * "finish-respond"
- * "you-are-saved"
+ *    EVENTS                                ALERTER CLIENT                             RESPONDER CLIENT                  SERVER
+ *
+ * "all-incidents"                      on- show all incidents                      on- show all incidents            send- all incidents frm DB
+ *
+ * "alert"                              send- alert                                 do nothing                        on- save in db, save id/name 
+ *                                                                                                                    of alerter, send- "new-incident" 
+ *                                                                                                                    to all, call responderFinder,
+ *                                                                                                                    send "found-responders" to the 
+ *                                                                                                                    alerter, send "please-respond"
+ *                                                                                                                    to connected found responders
+ *
+ * "new-incident"                       on- update marker on map                    on- update marker on map          send- new-incident
+ *
+ * "found-responders"                   on- (specific)update markers on map         on- update markers on map         send- found-responders
+ *
+ * "please-respond"                     do nothing                                  on- show alert box                send please-respond               
+ *
+ * "respond"                            do-nothing                                  send- respond                     on- save responder, give id/name
+ *                                                                                                                    start tracker service
+ * "responder-dispatch-status"          on- update marker                           on- update marker                 send- responder-dispatch-status
+ *
+ * "finish-respond"                                                                 send- finish-respond              on- send you-are-served
+ *
+ * "you-are-saved"                      on- update marker                           do nothing/update marker          send you-are-served
+ *
  * Service is responsible to do the following socket handling:
  * alerter opens device, connection established, server sends "all-incidents" (filter on location? show nearby events?)
  * alerter presses alert button, alerter client sends "alert" event with all necessary details like location, type of event, severity, emergency contact
- * on "alert" server saves "event" information in db, broadcasts to all responders active (store active responders somewhere?), 
+ * on "alert" server saves "event" information in db, broadcasts "new-incident" to all responders active (store active responders somewhere?), 
  * calls responderFinderService to find eligible responders(necessary? yes! otherwise responder far away will receive alert, doesnt make sense)
  * server emits "found-responders" event to all (all or only the alerter who sends alert and found responders?)
  * server emits "please-respond" event to nearby responders
@@ -42,7 +59,7 @@ module.exports= function(io){
 
       //TODO: set alerter id/name, saved with alerters.push in global alerters array, can be accessed later
 
-      alerter.emit("all-incidents",incidents);
+      alerter.emit("new-incident",incidents);
 
       alerters.push(alerter);
 
