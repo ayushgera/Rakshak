@@ -99,8 +99,7 @@ module.exports= function(io){
       respondingResponderSockets.push(responder);
       responderSockets.emit("responded",data.responder);
       alerterSockets.emit("responded",data.responder); //sends responded event to update all alerters and responders connected 
-      // responderTrackingService
-      // extract alerter by name
+      // responderTrackingService, extract alerter by name
       // setTimeOut(function(){responder.emit("responder-dispatch-status");},5000);
       // alerter.emit("responder-dispatch-status");
       console.log("!!!!!RESPOND!!!!!!!");
