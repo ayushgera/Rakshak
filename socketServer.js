@@ -1,9 +1,8 @@
 var responderFinder= require("./services/responderFinderService");
 var dbService= require(".model/data");
-var alerters=[];
-var responders=[];
-var respondingResponders=[];
-var incidents=[];
+var alerterSockets=[];
+var responderSockets=[];
+var respondingResponderSockets=[];
 
 /**
  * Events identified:
@@ -56,46 +55,50 @@ var incidents=[];
 module.exports= function(io){
   io.of('alerter').on('connection', function (alerter) {
 
-    alerter.emit("all-incidents",dbService.incidents);
+    alerter.emit("all-incidents",dbService.getAllIncidents());
     
     alerter.on('alert', function (data) {
 
       //TODO: set alerter id/name, saved with alerters.push in global alerters array, can be accessed later
 
-      io.sockets.emit("new-incident",data);
+      // for nearby other alerters and responders to have this incident added in their maps
+      io.sockets.emit("new-incident",data.incident); // TODO: send all data
 
-      alerters.push(alerter);
+      alerterSockets.push(alerter);
 
       console.log("!!!!!ALERT!!!!!!!");
-      // alert all alerters that an incident has been reported
-      // client alerter will use it to see if an event is already reported here
-      //alerters.broadcast.emit('incident-location', data);
-      //responders.broadcast.emit('incident-location', data);
+
       //TODO:
       //generate alerter id
       //store location, severity in db, with alerter id 
-      locations.push(data.location);
-      //the above schema would also contain the responders who would respond to the event
-      //broadcast this location and event type to all clients
+      dbService.addIncident(data.incident);
+      dbService.addVictim(data.victim);
+      dbService.addAlerter(data.alerter);
+
       //call responderfinder service, which returns array of closest reponders
-      var nearResponders=[];
-      nearResponders.push(responderFinder(data, responders));
-      //TODO: make synchronous
-      nearResponders.emit("please-respond",data);
-      //TODO: responders - near Responders
-      responders.emit("found-responders",data);
-      alerter.emit("found-responders",data);
-      //broadcast this location and event type to all returned responders
+      var foundResponderSockets=responderFinder(data.incident, responderSockets); //TODO: search in all responders from db, not just the connected ones
+      if(foundResponderSockets.length>0){
+        //broadcast this location and event type to all returned responders
+        foundResponderSockets.emit("please-respond",data.incident);
+        //TODO: make synchronous
+        //TODO: responders - near Responders
+        //var responders=getRespondersbyid(respondersockets);
+        responderSockets.emit("found-responders",dbService.getAllResponders());//TODO: send corresponding responders not respondersockets
+        alerterSockets.emit("found-responders",dbService.getAllResponders());
+      }
+
     });
   });
 
   io.of('responder').on('connection', function (responder) {
 
-    responder.emit("all-incidents",dbService.incidents);
+    responder.emit("all-incidents",dbService.getAllIncidents());
 
-    responders.push(responder);
+    responderSockets.push(responder);
     responder.on('respond', function (data) {
-      respondingResponders.push(responder);
+      respondingResponderSockets.push(responder);
+      responderSockets.emit("responded",data.responder);
+      alerterSockets.emit("responded",data.responder); //sends responded event to update all alerters and responders connected 
       // responderTrackingService
       // extract alerter by name
       // setTimeOut(function(){responder.emit("responder-dispatch-status");},5000);
