@@ -1,4 +1,5 @@
 var responderFinder= require("./services/responderFinderService");
+var dbService= require(".model/data");
 var alerters=[];
 var responders=[];
 var respondingResponders=[];
@@ -55,7 +56,7 @@ var incidents=[];
 module.exports= function(io){
   io.of('alerter').on('connection', function (alerter) {
 
-    alerter.emit("all-incidents",incidents);
+    alerter.emit("all-incidents",dbService.incidents);
     
     alerter.on('alert', function (data) {
 
@@ -90,7 +91,7 @@ module.exports= function(io){
 
   io.of('responder').on('connection', function (responder) {
 
-    responder.emit("all-incidents",incidents);
+    responder.emit("all-incidents",dbService.incidents);
 
     responders.push(responder);
     responder.on('respond', function (data) {
