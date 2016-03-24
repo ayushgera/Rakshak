@@ -83,17 +83,17 @@ module.exports= function(io){
 
       //call responderfinder service, which returns array of closest reponders
       if(dbService.getAllResponders().length>0){
-        var foundResponders=responderFinder(data.incident, dbService.getAllResponders()); //TODO: search in all responders from db, not just the connected ones
+        var foundResponderSockets=responderFinder(data.incident, responderSockets); //TODO: search in all responders from db, not just the connected ones
         //TODO: dont send to all responders
         io.of('responder').clients(function(error, respondersockets){
             if (error) throw error;
             //broadcast this location and event type to all returned responders
-            respondersockets.emit("please-respond",data.incident);
+            foundResponderSockets.emit("please-respond",{alerterId: alerter.id, incident: data.incident});
             //TODO: make synchronous
             //TODO: responders - near Responders
             //var responders=getRespondersbyid(respondersockets);
-            responderSockets.emit("found-responders",dbService.getAllResponders());//TODO: send corresponding responders not respondersockets
-            alerterSockets.emit("found-responders",dbService.getAllResponders());
+            responderSockets.emit("found-responders",foundResponderSockets);//TODO: send corresponding responders not respondersockets
+            alerterSockets.emit("found-responders",foundResponderSockets;
         });
 
           
@@ -105,15 +105,23 @@ module.exports= function(io){
   io.of('responder').on('connection', function (responder) {
 
     responder.emit("all-incidents",dbService.getAllIncidents());
+    //TODO: see if cane be made better, use this location to search of near responders
+    responder.on("responder-information", function(responderInfo){
+      responder.location=responderInfo.location;
+      responder.id=responderInfo.id;
+      responderSockets.push(responder);
+    });
 
-    responderSockets.push(responder);
-    responder.on('respond', function (data) {
+    responder.on('respond', function (data) { //TODO: data has alerter id
       respondingResponderSockets.push(responder);
       responderSockets.emit("responded",data.responder);
       alerterSockets.emit("responded",data.responder); //sends responded event to update all alerters and responders connected 
       // responderTrackingService, extract alerter by name
-      // setTimeOut(function(){responder.emit("responder-dispatch-status");},5000);
-      // alerter.emit("responder-dispatch-status");
+      setTimeOut(function(){
+        responder.emit("responder-dispatch-status");
+        io.of('alerters').to(data.alerterId).emit("responder-dispatch-status");
+      },5000);
+      
       console.log("!!!!!RESPOND!!!!!!!");
     });
   });
