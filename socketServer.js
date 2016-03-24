@@ -4,6 +4,12 @@ var alerterSockets=[];
 var responderSockets=[];
 var respondingResponderSockets=[];
 
+var getResponderSockets= function(responders){
+  for(){
+
+  }
+};
+
 /**
  * Events identified:
  *    EVENTS                                ALERTER CLIENT                             RESPONDER CLIENT                  SERVER
@@ -76,15 +82,21 @@ module.exports= function(io){
       dbService.addAlerter(data.alerter);
 
       //call responderfinder service, which returns array of closest reponders
-      var foundResponderSockets=responderFinder(data.incident, responderSockets); //TODO: search in all responders from db, not just the connected ones
-      if(foundResponderSockets.length>0){
-        //broadcast this location and event type to all returned responders
-        foundResponderSockets.emit("please-respond",data.incident);
-        //TODO: make synchronous
-        //TODO: responders - near Responders
-        //var responders=getRespondersbyid(respondersockets);
-        responderSockets.emit("found-responders",dbService.getAllResponders());//TODO: send corresponding responders not respondersockets
-        alerterSockets.emit("found-responders",dbService.getAllResponders());
+      if(dbService.getAllResponders().length>0){
+        var foundResponders=responderFinder(data.incident, dbService.getAllResponders()); //TODO: search in all responders from db, not just the connected ones
+        //TODO: dont send to all responders
+        io.of('responder').clients(function(error, respondersockets){
+            if (error) throw error;
+            //broadcast this location and event type to all returned responders
+            respondersockets.emit("please-respond",data.incident);
+            //TODO: make synchronous
+            //TODO: responders - near Responders
+            //var responders=getRespondersbyid(respondersockets);
+            responderSockets.emit("found-responders",dbService.getAllResponders());//TODO: send corresponding responders not respondersockets
+            alerterSockets.emit("found-responders",dbService.getAllResponders());
+        });
+
+          
       }
 
     });
