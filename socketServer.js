@@ -1,14 +1,8 @@
 var responderFinder= require("./services/responderFinderService");
-var dbService= require(".model/data");
+var dbService= require("./model/data");
 var alerterSockets=[];
 var responderSockets=[];
 var respondingResponderSockets=[];
-
-var getResponderSockets= function(responders){
-  for(){
-
-  }
-};
 
 /**
  * Events identified:
@@ -68,8 +62,8 @@ module.exports= function(io){
       //TODO: set alerter id/name, saved with alerters.push in global alerters array, can be accessed later
 
       // for nearby other alerters and responders to have this incident added in their maps
-      io.sockets.emit("new-incident",data.incident); // TODO: send all data
-
+      alerter.broadcast.emit("new-incident",data.incident); // TODO: send all data
+      io.of('responder').emit("new-incident",data.incident);
       alerterSockets.push(alerter);
 
       console.log("!!!!!ALERT!!!!!!!");
@@ -82,7 +76,7 @@ module.exports= function(io){
       dbService.addAlerter(data.alerter);
 
       //call responderfinder service, which returns array of closest reponders
-      if(dbService.getAllResponders().length>0){
+      if(responderSockets.length>0){
         var foundResponderSockets=responderFinder(data.incident, responderSockets); //TODO: search in all responders from db, not just the connected ones
         //TODO: dont send to all responders
         io.of('responder').clients(function(error, respondersockets){
@@ -93,7 +87,7 @@ module.exports= function(io){
             //TODO: responders - near Responders
             //var responders=getRespondersbyid(respondersockets);
             responderSockets.emit("found-responders",foundResponderSockets);//TODO: send corresponding responders not respondersockets
-            alerterSockets.emit("found-responders",foundResponderSockets;
+            alerterSockets.emit("found-responders",foundResponderSockets);
         });
 
           
