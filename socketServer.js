@@ -60,10 +60,11 @@ module.exports= function(io){
     alerter.on('alert', function (data) {
 
       //TODO: set alerter id/name, saved with alerters.push in global alerters array, can be accessed later
-
+      data.incident.alerterId=alerter.id;
       // for nearby other alerters and responders to have this incident added in their maps
-      alerter.broadcast.emit("new-incident",data.incident); // TODO: send all data
-      io.of('responder').emit("new-incident",data.incident);
+
+      alerter.broadcast.emit("new-incident",{"incident":data.incident}); // TODO: send all data
+      io.of('responder').emit("new-incident",{"incident":data.incident});
       alerterSockets.push(alerter);
 
       console.log("!!!!!ALERT!!!!!!!");
@@ -82,12 +83,12 @@ module.exports= function(io){
         io.of('responder').clients(function(error, respondersockets){
             if (error) throw error;
             //broadcast this location and event type to all returned responders
-            foundResponderSockets.emit("please-respond",{alerterId: alerter.id, incident: data.incident});
+           // foundResponderSockets.emit("please-respond",{alerterId: alerter.id, incident: data.incident});
             //TODO: make synchronous
             //TODO: responders - near Responders
             //var responders=getRespondersbyid(respondersockets);
-            responderSockets.emit("found-responders",foundResponderSockets);//TODO: send corresponding responders not respondersockets
-            alerterSockets.emit("found-responders",foundResponderSockets);
+           // responderSockets.emit("found-responders",foundResponderSockets);//TODO: send corresponding responders not respondersockets
+           // alerterSockets.emit("found-responders",foundResponderSockets);
         });
 
           
@@ -108,13 +109,14 @@ module.exports= function(io){
 
     responder.on('respond', function (data) { //TODO: data has alerter id
       respondingResponderSockets.push(responder);
-      responderSockets.emit("responded",data.responder);
-      alerterSockets.emit("responded",data.responder); //sends responded event to update all alerters and responders connected 
+      responder.emit("responded",data.responder);
+      responder.broadcast.emit("responded",data.responder);
+      io.of('alerter').emit("responded",data.responder); //sends responded event to update all alerters and responders connected 
       // responderTrackingService, extract alerter by name
-      setTimeOut(function(){
+      setInterval(function(){
         responder.emit("responder-dispatch-status");
-        io.of('alerters').to(data.alerterId).emit("responder-dispatch-status");
-      },5000);
+        io.of('alerter').to(data.alerterId).emit("responder-dispatch-status","IT WORKS!!!");
+      },1000);
       
       console.log("!!!!!RESPOND!!!!!!!");
     });

@@ -2,10 +2,42 @@
 <title>Socket.IO example application</title>
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
-	var alert = io.connect('http://127.0.0.1:3000/responder');
-	alert.on("all-incidents",function(data){console.log("all-incidents");});
-	alert.on("respond-to-incdent", function(data){console.log("respond to incdent");});
-	alert.emit('alert', {"location":{"latitude":2.234435,"longitude":77.43345}}); 
+	var responder = io.connect('http://127.0.0.1:3000/responder');
+	var newIncidentAlerterId;
+	responder.emit('responder-information', {"location":{"latitude":2.234435,"longitude":77.43345}}); 
+
+	responder.on("all-incidents",function(data){
+		console.log("all-incidents");
+		document.getElementById("all-incidents").innerHTML=JSON.stringify(data);
+	});
+
+	responder.on("new-incident",function(data){
+		console.log("new-incident");
+		newIncidentAlerterId= data.incident.alerterId;
+		document.getElementById("new-incident").innerHTML=JSON.stringify(data);
+	});
+
+	responder.on("responded",function(data){
+		console.log("responded info");
+		document.getElementById("responded").innerHTML=JSON.stringify(data);
+	});
+
+	responder.on("responder-dispatch-status",function(data){
+		console.log("responded info");
+		document.getElementById("responder-dispatch-status").innerHTML=JSON.stringify(data);
+	});
+
+	function respond(){
+		console.log("alerter id: "+newIncidentAlerterId);
+		responder.emit('respond', {"alerterId":newIncidentAlerterId, "location":{"latitude":2.234435,"longitude":77.43345}}); 
+	}
 </script>
-</head> <body> ALERT MAIN PAGE</body>
+</head> 
+<body>
+	<div id="all-incidents"></div>
+	<div id="new-incident"></div>
+	<button id="respond" onclick="respond();"></button>
+	<div id="responded"></div>
+	<div id="responder-dispatch-status"></div>
+</body>
 </html>
