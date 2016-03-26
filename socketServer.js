@@ -78,20 +78,16 @@ module.exports= function(io){
 
       //call responderfinder service, which returns array of closest reponders
       if(responderSockets.length>0){
-        var foundResponderSockets=responderFinder(data.incident, responderSockets); //TODO: search in all responders from db, not just the connected ones
+        var foundResponderSockets=responderFinder.findNearbyResponders(data.incident, responderSockets); //TODO: search in all responders from db, not just the connected ones
         //TODO: dont send to all responders
-        io.of('responder').clients(function(error, respondersockets){
-            if (error) throw error;
-            //broadcast this location and event type to all returned responders
-           // foundResponderSockets.emit("please-respond",{alerterId: alerter.id, incident: data.incident});
-            //TODO: make synchronous
-            //TODO: responders - near Responders
-            //var responders=getRespondersbyid(respondersockets);
-           // responderSockets.emit("found-responders",foundResponderSockets);//TODO: send corresponding responders not respondersockets
-           // alerterSockets.emit("found-responders",foundResponderSockets);
-        });
-
-          
+        for(var i=0;i<foundResponderSockets.length;i++){
+          //broadcast this location and event type to all returned responders
+          foundResponderSockets[i].emit("please-respond",{"alerterId": alerter.id, "incident": data.incident});
+        }
+        //find the corresponding responder objects and broadcast to all to see what all responders have been alerted
+        var foundResponders= responderfinder.findRespondersFromSockets(foundResponderSockets);
+        io.of('responder').emit("found-responders",foundResponders);
+        io.of('alerter').emit("found-responders",foundResponders);
       }
 
     });
