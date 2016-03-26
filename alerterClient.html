@@ -19,6 +19,11 @@
 		document.getElementById("responded").innerHTML=JSON.stringify(data);
 	});
 
+	alerter.on("found-responders",function(data){
+		console.log("found these responders");
+		document.getElementById("found-responders").innerHTML=JSON.stringify(data);
+	});
+
 	alerter.on("responder-dispatch-status",function(data){
 		console.log("responded info");
 		document.getElementById("responder-dispatch-status").innerHTML=document.getElementById("responder-dispatch-status").innerHTML+JSON.stringify(data);
@@ -33,6 +38,7 @@
 	<div id="all-incidents"></div>
 	<div id="new-incident"></div>
 	<button id="alert" onclick="alert();">ALERT</button>
+	<div id="found-responders"></div>
 	<div id="responded"></div>
 	<div id="responder-dispatch-status"></div>
 </body>

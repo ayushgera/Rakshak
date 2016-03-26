@@ -17,6 +17,20 @@
 		document.getElementById("new-incident").innerHTML=JSON.stringify(data);
 	});
 
+	responder.on("found-responders",function(data){
+		console.log("found these responders");
+		document.getElementById("found-responders").innerHTML=JSON.stringify(data);
+	});
+
+	responder.on("please-respond",function(data){
+		console.log("found these responders");
+		var respond= confirm("YOU ARE CLOSEST TO THE INCIDENT. YOU CAN SAVE A LIFE. PLEASE RESPOND.");
+		if(respond){
+			console.log("alerter id: "+newIncidentAlerterId);
+			responder.emit('respond', {"alerterId":newIncidentAlerterId, "location":{"latitude":2.234435,"longitude":77.43345}});
+		}
+	});
+
 	responder.on("responded",function(data){
 		console.log("responded info");
 		document.getElementById("responded").innerHTML=JSON.stringify(data);
@@ -36,7 +50,8 @@
 <body>
 	<div id="all-incidents"></div>
 	<div id="new-incident"></div>
-	<button id="respond" onclick="respond();"></button>
+	<button id="respond" onclick="respond();">RESPOND</button>
+	<div id="found-responders"></div>
 	<div id="responded"></div>
 	<div id="responder-dispatch-status"></div>
 </body>

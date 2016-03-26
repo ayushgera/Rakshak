@@ -85,7 +85,7 @@ module.exports= function(io){
           foundResponderSockets[i].emit("please-respond",{"alerterId": alerter.id, "incident": data.incident});
         }
         //find the corresponding responder objects and broadcast to all to see what all responders have been alerted
-        var foundResponders= responderfinder.findRespondersFromSockets(foundResponderSockets);
+        var foundResponders= responderFinder.findRespondersFromSockets(foundResponderSockets);
         io.of('responder').emit("found-responders",foundResponders);
         io.of('alerter').emit("found-responders",foundResponders);
       }
