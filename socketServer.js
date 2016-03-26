@@ -72,6 +72,7 @@ module.exports= function(io){
       //TODO:
       //generate alerter id
       //store location, severity in db, with alerter id 
+      //TODO: see if async library can be used
       dbService.addIncident(data.incident);
       dbService.addVictim(data.victim);
       dbService.addAlerter(data.alerter);
@@ -86,6 +87,7 @@ module.exports= function(io){
         }
         //find the corresponding responder objects and broadcast to all to see what all responders have been alerted
         var foundResponders= responderFinder.findRespondersFromSockets(foundResponderSockets);
+        //TODO: foundResponders should be synchronously handled once retrieved from db
         io.of('responder').emit("found-responders",foundResponders);
         io.of('alerter').emit("found-responders",foundResponders);
       }
