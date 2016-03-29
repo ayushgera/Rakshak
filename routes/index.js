@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var googleDistance = require("google-distance");
 var data = require('../model/data'); //TODO: replace with dbService
 
 /* GET home page. */
@@ -14,6 +15,17 @@ router.get('/alert', function(req, res, next){
 
 router.get('/responders', function(req, res, next){
   res.send(data.responders);
+});
+
+router.get('/map', function(req, res, next){
+  googleDistance.get({
+		origins: ['San Francisco, CA','San Diego, CA'],
+		destinations: ['San Diego, CA','Seattle, WA']
+	},
+	function(err, data) {
+	if (err) return console.log(err);
+		res.send(data);
+	});
 });
 
 //add responder

@@ -11,7 +11,7 @@ responderFinderService.findRespondersFromSockets= function(responderSockets){
 	var allResponders= dbService.getAllResponders();
 	for(var i=0;i<responderSockets.length;i++){
 		for(var j=0;j<allResponders.length;j++){
-			if(responderSockets[i].id===allResponders[j].id){
+			if(responderSockets[i].id==allResponders[j].id){
 				foundResponders.push(allResponders[j]);
 			}	
 		}
