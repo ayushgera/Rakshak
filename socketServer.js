@@ -26,7 +26,7 @@ var respondingResponderSockets=[];
  * "respond"                            do-nothing                                  send- respond                     on- save responder, give id/name
  *                                                                                                                    start tracker service
  * 
- * "responder-dispatch-status"          on- update marker                           on- update marker                 send- responder-dispatch-status
+ * "responder-dispatch-status"          on- update marker                           send-responder-dispatch-status    on- re-route the same to specific alerter
  *
  * "finish-respond"                     do-nothing                                  send- finish-respond              on- send you-are-served
  *
@@ -110,12 +110,7 @@ module.exports= function(io){
       responder.emit("responded",data.responder);
       responder.broadcast.emit("responded",data.responder);
       io.of('alerter').emit("responded",data.responder); //sends responded event to update all alerters and responders connected 
-      // responderTrackingService, extract alerter by name
-      //setInterval(function(){
-      //  responder.emit("responder-dispatch-status");
-      //  io.of('alerter').to(data.alerterId).emit("responder-dispatch-status","IT WORKS!!!");
-      //},1000);
-      
+
       console.log("!!!!!RESPOND!!!!!!!");
     });
 
