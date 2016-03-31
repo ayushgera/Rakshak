@@ -58,6 +58,10 @@
 	    element.onclick = function() { // Note this is a function
 	        console.log("alerter id: "+alerterId);
 			responder.emit('respond', {"alerterId":alerterId, "location":{"latitude":2.234435,"longitude":77.43345}});
+
+			setInterval(function(){
+		        responder.emit("responder-dispatch-status",{"alerterId":alerterId, "location":{"latitude":9.9999,"longitude":99.9999}});
+		    },1000);
 	    };
 
 	    var foo = document.getElementById("alerter-to-respond");
