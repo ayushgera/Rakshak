@@ -3,7 +3,7 @@ var dbService= require("./model/data");
 var alerterSockets=[];
 var responderSockets=[];
 var respondingResponderSockets=[];
-
+var locationMock=1;
 /**
  * Events identified:
  *    EVENTS                                ALERTER CLIENT                             RESPONDER CLIENT                  SERVER
@@ -115,7 +115,7 @@ module.exports= function(io){
     });
 
     responder.on('responder-dispatch-status', function(data){
-      io.of('alerter').to(data.alerterId).emit("responder-dispatch-status",data.location);
+      io.of('alerter').to(data.alerterId).emit("responder-dispatch-status",{"latitude":locationMock++,"longitude":locationMock++});
     });
 
   });

@@ -11,28 +11,33 @@
     <!-- Socket IO -->
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB16sGmIekuGIvYOfNoW9T44377IU2d2Es&sensor=true"></script>
+    <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB16sGmIekuGIvYOfNoW9T44377IU2d2Es&sensor=true"></script>-->
     <!-- Modernizr -->
     <!--<script src="../bower_components/modernizr/bin/modernizr"></script>-->
     <!-- JS Source -->
     <script src="./bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="./bower_components/angular/angular.js"></script>
+    <script src="./bower_components/angular/angular.min.js"></script>
     <script src="./bower_components/angular-route/angular-route.js"></script>
-    <script src="./bower_components/angularjs-geolocation/dist/angularjs-geolocation.min.js"></script>
+    <script src='./bower_components/lodash/dist/lodash.min.js'></script>
+    <script src='./bower_components/angular-simple-logger/dist/angular-simple-logger.min.js'></script>
+    <script src='./bower_components/angular-google-maps/dist/angular-google-maps.js'></script>
     <script src="./app/services/SASService.js"></script>
     <script src="./app/SASController.js"></script>
+    <style>
+        .angular-google-map-container { 
+            height: 400px; 
+        }
+    </style>
 </head>
 <body ng-controller="SASController">
-<div class="container">
-    <div class="header">
-        <ul class="nav nav-pills pull-right">
-            <li active><a href="">Report Incident!</a></li>
-            <li disabled><a href="">View all incidents</a></li>
-        </ul>
-        <h3 class="text-muted">Project SAS</h3>
+<div>
+
+    <div>
+        <a ng-click="viewName='incidents'">view all incidents</a>
+        <a ng-click="viewName='responder'">track responder</a>
     </div>
     <!-- List of Nearby Incidents -->
-    <div class="row content">
+    <div>
           <div id="all-incidents" ng-bind="data.allIncidents"></div>
           <div id="new-incident" ng-bind="data.newIncident"></div>
           <button id="alert" ng-click="alertServer()">ALERT</button>
@@ -41,11 +46,13 @@
           <div id="responder-dispatch-status" ng-bind="data.trackResponderLocation"></div>
     </div>
     <!-- Map -->
-    <div class="row content">
+    <div>
         <!-- Google Map -->
-        <div class="col-md-12">
-            <div id="map"></div>
-        </div>
+        <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true">
+            <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
+            </ui-gmap-markers>
+        </ui-gmap-google-map>
+
     </div>
     <hr/>
     <!-- Footer -->
