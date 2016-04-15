@@ -1,5 +1,5 @@
 // Creates the SASApp Module and Controller. Note that it depends on the 'SAS.services' module and service.
-var SASApp = angular.module('SASApp', ['SAS.services', 'uiGmapgoogle-maps']);
+var SASApp = angular.module('SASApp', ['SAS.services', 'uiGmapgoogle-maps', 'ngGeolocation']);
 
 //load google map
 SASApp.config(function(uiGmapGoogleMapApiProvider) {
@@ -9,12 +9,13 @@ SASApp.config(function(uiGmapGoogleMapApiProvider) {
     });
 });
 
-SASApp.controller('SASController', function($scope, alerterSocket, uiGmapGoogleMapApi){
+SASApp.controller('SASController', function($scope, $geolocation, alerterSocket, uiGmapGoogleMapApi){
 	$scope.markerId= 0;
 	$scope.data= {};
 	$scope.trackResponderLocations= [];
 	$scope.allIncidentMarkers= [];
 	$scope.respondersDispatched= [];
+	$scope.viewName="responder";
 
 	alerterSocket.on("all-incidents",function(data){
 		$scope.data.allIncidents= data;
@@ -85,10 +86,15 @@ SASApp.controller('SASController', function($scope, alerterSocket, uiGmapGoogleM
     // The "then" callback function provides the google.maps object.
     uiGmapGoogleMapApi.then(function(maps) {
     	var allIncidentMarkers=[];
-    	$scope.respondersDispatched=[{"id":9999,"title":"responder"},{"id":1111,"title":"alerter"}];
+    	$scope.respondersDispatched=[{"id":9999,"title":"alerter"},{"id":1111,"title":"responder"}];
+    	
     	//this is your location
-    	$scope.respondersDispatched[1].latitude=22.244352345;
-    	$scope.respondersDispatched[1].longitude=77.452435;
+    	$geolocation.getCurrentPosition({
+            timeout: 60000
+         }).then(function(position) {
+            $scope.respondersDispatched[0].latitude= position.coords.latitude;
+    		$scope.respondersDispatched[0].longitude= position.coords.longitude;
+         });
     	
     	var lat=22.1111, longi=77.123;
     	
@@ -96,7 +102,7 @@ SASApp.controller('SASController', function($scope, alerterSocket, uiGmapGoogleM
     		return $scope.data.allIncidents;
     	}, function(){
     		var allIncidents= $scope.data.allIncidents;
-
+    		if(allIncidents){
     			for(var i=0;i< allIncidents.length;i++){
 		    		allIncidentMarkers.push({
 			        	"latitude": allIncidents[i].location.latitude,
@@ -105,7 +111,7 @@ SASApp.controller('SASController', function($scope, alerterSocket, uiGmapGoogleM
 			      		"id" : i
 			      	});
     			}
-
+    		}
     		$scope.allIncidentMarkers= allIncidentMarkers;
     	});
 
@@ -114,9 +120,10 @@ SASApp.controller('SASController', function($scope, alerterSocket, uiGmapGoogleM
     		return $scope.data.trackResponderLocation;
     	}, function(){
     		var responderTrack= $scope.data.trackResponderLocation;
-
-    		$scope.respondersDispatched[0].latitude=responderTrack.latitude;
-    		$scope.respondersDispatched[0].longitude=responderTrack.longitude;
+    		if(responderTrack){
+    			$scope.respondersDispatched[1].latitude=responderTrack.latitude;
+    			$scope.respondersDispatched[1].longitude=responderTrack.longitude;
+    		}
     	});
     	
     	/*$scope.$watch(function(){

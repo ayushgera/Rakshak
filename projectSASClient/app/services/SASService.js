@@ -26,8 +26,3 @@ services.factory('alerterSocket', function ($rootScope) {
   };
 });
 
-// Creates the gservice factory. This will be the primary means by which we interact with Google Maps
-services.factory('gservice',  function(){
-  var googleMapService={};
-  return googleMapService;
-});
