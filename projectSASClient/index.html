@@ -1,0 +1,83 @@
+<!doctype html>
+<!-- Declares meanMapApp as the starting Angular module -->
+<html class="no-js" ng-app="SASApp">
+<head>
+    <meta charset="utf-8">
+    <title>Save A Soul!</title>
+    <meta name="description" content="Little did I know, I too can save a Life">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CSS -->
+    <link rel="stylesheet" href="./bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+    <!-- Socket IO -->
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <!-- Google Maps API -->
+    <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB16sGmIekuGIvYOfNoW9T44377IU2d2Es&sensor=true"></script>-->
+    <!-- Modernizr -->
+    <!--<script src="../bower_components/modernizr/bin/modernizr"></script>-->
+    <!-- JS Source -->
+    <script src="./bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="./bower_components/angular/angular.min.js"></script>
+    <script src="./bower_components/angular-route/angular-route.js"></script>
+    <script src='./bower_components/lodash/dist/lodash.min.js'></script>
+    <script src='./bower_components/angular-simple-logger/dist/angular-simple-logger.min.js'></script>
+    <script src='./bower_components/angular-google-maps/dist/angular-google-maps.js'></script>
+    <script src="./bower_components/ngGeolocation/ngGeolocation.min.js"></script>
+    <script src="./app/model/dataService.js"></script>
+    <script src="./app/model/locationService.js"></script>
+    <script src="./app/services/SASService.js"></script>
+    <script src="./app/SASController.js"></script>
+    <style>
+        .angular-google-map-container { 
+            height: 400px; 
+        }
+    </style>
+
+</head>
+<body ng-controller="SASController">
+<div>
+
+    <div>
+        <a ng-click="viewName='incidents'">view all incidents</a>
+        <a ng-click="viewName='responder'">track responder</a>
+    </div>
+    <!-- List of Nearby Incidents -->
+    <div>
+          <div id="all-incidents" ng-bind="data.allIncidents"></div>
+          <div id="new-incident" ng-bind="data.newIncident"></div>
+          <button id="alert" ng-click="alertServer()">ALERT</button>
+          <div id="found-responders" ng-bind="foundResponders"></div>
+          <div id="responded" ng-bind="data.responded"></div>
+          <div id="responder-dispatch-status" ng-bind="data.trackResponderLocation"></div>
+    </div>
+    <!-- Map -->
+    <div>
+        <!-- Google Map -->
+        <!--<ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true">
+            <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
+            </ui-gmap-markers>
+        </ui-gmap-google-map>-->
+        <div ng-view></div>
+
+    </div>
+    <hr/>
+    <!-- Footer -->
+    <div class="footer">
+        <p class="text-center"><span class="glyphicon glyphicon-check"></span> 
+          Created by Ayush Gera for Project Save a soul
+        </p>
+    </div>
+
+          <script type="text/ng-template" id="gmap.html">
+       <!-- Map -->
+        <div>
+            <!-- Google Map -->
+            <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true">
+                <ui-gmap-markers models='markerModel' fit="true" coords="'self'" icon="'icon'">
+                </ui-gmap-markers>
+            </ui-gmap-google-map>
+
+        </div>
+      </script>
+</div>
+</body>
+</html>

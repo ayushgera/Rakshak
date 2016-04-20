@@ -1,0 +1,81 @@
+<html> 
+<head>
+<title>Socket.IO example application</title>
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+	var responder = io.connect('http://127.0.0.1:3000/responder');
+	var newIncidentAlerterIds=[];
+	responder.emit('responder-information', {"location":{"latitude":2.234435,"longitude":77.43345}}); 
+
+	responder.on("all-incidents",function(data){
+		console.log("all-incidents");
+		document.getElementById("all-incidents").innerHTML=JSON.stringify(data);
+	});
+
+	responder.on("new-incident",function(data){
+		console.log("new-incident");
+		document.getElementById("new-incident").innerHTML=JSON.stringify(data);
+	});
+
+	responder.on("found-responders",function(data){
+		console.log("found these responders");
+		document.getElementById("found-responders").innerHTML=JSON.stringify(data);
+	});
+
+	responder.on("please-respond",function(data){
+		console.log("found these responders");
+		newIncidentAlerterIds.push(data.incident.alerterId);
+		addElement("button", data.incident.alerterId);
+		//var respond= confirm("YOU ARE CLOSEST TO THE INCIDENT. YOU CAN SAVE A LIFE. PLEASE RESPOND.");
+		//if(respond){
+		//	console.log("alerter id: "+newIncidentAlerterId);
+		//	responder.emit('respond', {"alerterId":newIncidentAlerterId, "location":{"latitude":2.234435,"longitude":77.43345}});
+		//}
+	});
+
+	responder.on("responded",function(data){
+		console.log("responded info");
+		document.getElementById("responded").innerHTML=JSON.stringify(data);
+	});
+
+	responder.on("responder-dispatch-status",function(data){
+		console.log("responded info");
+		document.getElementById("responder-dispatch-status").innerHTML=JSON.stringify(data);
+	});
+
+	function respond(alerterId){
+		console.log("alerter id: "+alerterId);
+		responder.emit('respond', {"alerterId":alerterId, "location":{"latitude":2.234435,"longitude":77.43345}}); 
+	}
+
+	function addElement(type, alerterId) {
+	    //Create an input type dynamically.   
+	    var element = document.createElement("input");
+	    //Assign different attributes to the element. 
+	    element.type = type;
+	    element.value = alerterId; // Really? You want the default value to be the type string?
+	    element.name = alerterId;  // And the name too?
+	    element.onclick = function() { // Note this is a function
+	        console.log("alerter id: "+alerterId);
+			responder.emit('respond', {"alerterId":alerterId, "location":{"latitude":2.234435,"longitude":77.43345}});
+
+			setInterval(function(){
+		        responder.emit("responder-dispatch-status",{"alerterId":alerterId, "location":{"latitude":9.9999,"longitude":99.9999}});
+		    },1000);
+	    };
+
+	    var foo = document.getElementById("alerter-to-respond");
+	    //Append the element in page (in span).  
+	    foo.appendChild(element);
+	}
+</script>
+</head> 
+<body>
+	<div id="all-incidents"></div>
+	<div id="new-incident"></div>
+	<div id="alerter-to-respond"></div>
+	<div id="found-responders"></div>
+	<div id="responded"></div>
+	<div id="responder-dispatch-status"></div>
+</body>
+</html>
