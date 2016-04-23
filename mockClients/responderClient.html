@@ -3,7 +3,7 @@
 <title>Socket.IO example application</title>
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
-	var responder = io.connect('http://127.0.0.1:3000/responder');
+	var responder = io.connect('https://sleepy-caverns-38132.herokuapp.com/responder');
 	var newIncidentAlerterIds=[];
 	responder.emit('responder-information', {"location":{"latitude":2.234435,"longitude":77.43345}}); 
 
@@ -61,7 +61,7 @@
 
 			setInterval(function(){
 		        responder.emit("responder-dispatch-status",{"alerterId":alerterId, "location":{"latitude":9.9999,"longitude":99.9999}});
-		    },1000);
+		    },10000);
 	    };
 
 	    var foo = document.getElementById("alerter-to-respond");
