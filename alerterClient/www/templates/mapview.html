@@ -1,0 +1,27 @@
+<!-- List of Nearby Incidents -->
+<ion-view view-title="mapview">
+  <ion-content>
+    <!-- Map -->
+    <div class="alert-wrapper">
+        <!-- Google Map -->
+        <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true">
+            <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
+            </ui-gmap-markers>
+        </ui-gmap-google-map>
+
+        <div class="alert-button">
+          <button class="button button-block button-positive" ng-click="alertServer()">
+             ALERT
+          </button>
+        </div>
+
+    </div>
+    <hr/>
+    <!-- Footer -->
+    <div class="footer">
+        <p class="text-center"><span class="glyphicon glyphicon-check"></span> 
+          Created by Ayush Gera for Project Save a soul
+        </p>
+    </div>
+  </ion-content>
+</ion-view>
