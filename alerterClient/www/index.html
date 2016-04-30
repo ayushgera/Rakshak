@@ -31,21 +31,33 @@
     <script src="js/app.js"></script>
     <script src="js/controllers.js"></script>
     <style type="text/css">
-    .angular-google-map-container { 
+
+    .search-bar{
+        height: 7%;
+    }
+    .search-cancel{
+        width: 10%;
+        right: 0;
+    }
+    .search-cancel .ion-close-circled{
+        font-size: x-large;
+    }
+    .search-cancel:before{
+        content:"";
+        margin-left: 10px;
+    }
+    .map-container{
+        height: 83%;
+    }
+    .angular-google-map-container, .angular-google-map, .alert-wrapper  { 
       height: 100%; 
     }
-    .angular-google-map {
-        height: 100%;
-    }
-    .alert-wrapper{
-        height: 100%;
-    }
     .alert-button{
-        position:absolute;
-        bottom:0;
-        left:0;
-        right:0;
+        height:10%;
+        background-color: lightgray;
+        overflow: hidden;
     }
+
     </style>
   </head>
 

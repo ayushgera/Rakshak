@@ -90,7 +90,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     }
   });
 
-  $scope.map = { center: { latitude: 45, longitude: -73 }, zoom: 13 };
+  $scope.map = { center: { latitude: 45, longitude: -73 }, zoom: 13, options:{disableDefaultUI: true} };
 
   //update markermodel whenever view changes    
   /*$scope.$watch(function(){
@@ -107,7 +107,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     // The "then" callback function provides the google.maps object.
     uiGmapGoogleMapApi.then(function(maps) {
       var allIncidentMarkers=[];
-      $scope.respondersDispatched=[{"id":9999,"title":"alerter"},{"id":1111,"title":"responder"}];
+      $scope.respondersDispatched=[{"id":"alerter","title":"alerter","icon":"../img/Help.png"},{"id":"responder","title":"responder","icon":"../img/Ambulance.png"}];
 
       $ionicLoading.show({
         template: 'Loading...'
@@ -132,7 +132,8 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
                 "latitude": allIncidents[i].location.latitude,
                 "longitude": allIncidents[i].location.longitude,
                 "title": 'm' + i,
-                "id" : i
+                "id" : i,
+                "icon": '../img/Hospital.png'
               });
           }
         }

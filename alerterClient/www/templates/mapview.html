@@ -3,25 +3,29 @@
   <ion-content>
     <!-- Map -->
     <div class="alert-wrapper">
+        <div class="search-bar">
+          <div class="bar bar-header item-input-inset">
+            <label class="item-input-wrapper">
+              <i class="icon ion-ios-search placeholder-icon"></i>
+              <input type="search" placeholder="Search">
+            </label>
+            <div class="search-cancel">
+            <i class="ion-close-circled"></i>
+            </div>
+          </div>
+        </div>
         <!-- Google Map -->
-        <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true">
+        <div class="map-container">
+        <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true" options="map.options">
             <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
             </ui-gmap-markers>
         </ui-gmap-google-map>
-
+        </div>
         <div class="alert-button">
           <button class="button button-block button-positive" ng-click="alertServer()">
              ALERT
           </button>
         </div>
-
-    </div>
-    <hr/>
-    <!-- Footer -->
-    <div class="footer">
-        <p class="text-center"><span class="glyphicon glyphicon-check"></span> 
-          Created by Ayush Gera for Project Save a soul
-        </p>
     </div>
   </ion-content>
 </ion-view>
