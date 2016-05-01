@@ -12,7 +12,7 @@
     <ion-nav-view name="menuContent"></ion-nav-view>
   </ion-side-menu-content>
 
-  <ion-side-menu side="left">
+  <ion-side-menu side="left"  expose-aside-when="large">
     <ion-header-bar class="bar-stable">
       <h1 class="title">Save A Soul</h1>
     </ion-header-bar>
@@ -21,10 +21,13 @@
         <ion-item menu-close ng-click="login()">
           Login
         </ion-item>
-        <ion-item menu-close ng-click="changeView('responder')">
+        <ion-item menu-close ng-click="changeView('alert')" ui-sref-active="activated">
           Alert
         </ion-item>
-        <ion-item menu-close ng-click="changeView('incidents')">
+        <ion-item menu-close ng-click="changeView('responder')" ui-sref-active="activated">
+          Track Responder
+        </ion-item>
+        <ion-item menu-close ng-click="changeView('incidents')" ui-sref-active="activated">
           All Incidents
         </ion-item>
       </ion-list>

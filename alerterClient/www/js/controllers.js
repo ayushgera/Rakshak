@@ -29,8 +29,6 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     $scope.modal.show();
   };
 
-  $scope.$broadcast('changeView', "incidents");
-
   $scope.changeView= function (viewName) {
      $scope.$broadcast('changeView', viewName);
   };
@@ -51,10 +49,11 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   $scope.markerId= 0;
   $scope.data= {};
   $scope.trackResponderLocations= [];
+  $scope.alerterPageMarkers= [];
   $scope.allIncidentMarkers= [];
-  $scope.respondersDispatched= [];
-  $scope.viewName="responder";
-  $scope.markerModel= $scope.allIncidentMarkers;
+  $scope.respTrackPageMarkers= [];
+  $scope.viewName= "alert";
+  $scope.markerModel= $scope.alerterPageMarkers;
 
   alerterSocket.on("all-incidents",function(data){
     $scope.data.allIncidents= data;
@@ -83,14 +82,20 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   };
 
   $scope.$on('changeView', function(event, viewName) { 
-    if(viewName==="responder"){
-      $scope.markerModel= $scope.respondersDispatched;
+    if(viewName==="alert"){
+      $scope.markerModel= $scope.alerterPageMarkers;
+    }else if(viewName==="responder"){
+      $scope.markerModel= $scope.respTrackPageMarkers;
     }else if (viewName==="incidents") {
       $scope.markerModel= $scope.allIncidentMarkers;
     }
   });
 
-  $scope.map = { center: { latitude: 45, longitude: -73 }, zoom: 13, options:{disableDefaultUI: true} };
+  $scope.map = { 
+    center: { latitude: 45, longitude: -73 }, 
+    zoom: 13, 
+    options: {disableDefaultUI: true} 
+  };
 
   //update markermodel whenever view changes    
   /*$scope.$watch(function(){
@@ -99,7 +104,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     if($scope.$parent.$parent.viewName==="incidents"){
       $scope.markerModel= $scope.allIncidentMarkers;
     }else if($scope.$parent.$parent.viewName==="responder"){
-      $scope.markerModel= $scope.respondersDispatched;
+      $scope.markerModel= $scope.respTrackPageMarkers;
     }
   });*/
 
@@ -107,7 +112,10 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     // The "then" callback function provides the google.maps object.
     uiGmapGoogleMapApi.then(function(maps) {
       var allIncidentMarkers=[];
-      $scope.respondersDispatched=[{"id":"alerter","title":"alerter","icon":"../img/Help.png"},{"id":"responder","title":"responder","icon":"../img/Ambulance.png"}];
+      $scope.respTrackPageMarkers=[
+        {"id":"alerter","title":"alerter","icon":"../img/Help.png"},
+        {"id":"responder","title":"responder","icon":"../img/Ambulance.png"}
+      ];
 
       $ionicLoading.show({
         template: 'Loading...'
@@ -115,13 +123,27 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
       navigator.geolocation
       .getCurrentPosition(function (position) {
-        $scope.respondersDispatched[0].latitude= position.coords.latitude;
-        $scope.respondersDispatched[0].longitude= position.coords.longitude;
+        $scope.alerterPageMarkers.push({
+          "id": "alerterMain",
+          "latitude": position.coords.latitude,
+          "longitude": position.coords.longitude,
+          "icon":"../img/Help.png"
+        });
+        $scope.respTrackPageMarkers[0].latitude= position.coords.latitude;
+        $scope.respTrackPageMarkers[0].longitude= position.coords.longitude;
         $ionicLoading.hide();
       });
-      
-      var lat=22.1111, longi=77.123;
-      
+
+      $scope.$watch(function(){
+        return $scope.data.trackResponderLocation;
+      }, function(){
+        var responderTrack= $scope.data.trackResponderLocation;
+        if(responderTrack){
+          $scope.respTrackPageMarkers[1].latitude=responderTrack.latitude;
+          $scope.respTrackPageMarkers[1].longitude=responderTrack.longitude;
+        }
+      });
+
       $scope.$watch(function(){
         return $scope.data.allIncidents;
       }, function(){
@@ -138,17 +160,6 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
           }
         }
         $scope.allIncidentMarkers= allIncidentMarkers;
-      });
-
-
-      $scope.$watch(function(){
-        return $scope.data.trackResponderLocation;
-      }, function(){
-        var responderTrack= $scope.data.trackResponderLocation;
-        if(responderTrack){
-          $scope.respondersDispatched[1].latitude=responderTrack.latitude;
-          $scope.respondersDispatched[1].longitude=responderTrack.longitude;
-        }
       });
       
     });
