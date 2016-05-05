@@ -65,6 +65,9 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
   alerterSocket.on("responded",function(data){
     $scope.data.responded= JSON.stringify(data);
+    if($scope.data.responded && $scope.data.responded.length>0){
+      $ionicLoading.hide();
+    }
   });
 
   alerterSocket.on("found-responders",function(data){
@@ -77,7 +80,10 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
 
   $scope.alertServer= function(){
-    alerterSocket.emit('alert', {"incident": {"id":10, "location": {"latitude":3.9189, "longitude":100.23971}, "type":"accident","severity":"low"}}); 
+      $ionicLoading.show({
+        template: 'Alert sent. Waiting for responders...'
+      });
+    alerterSocket.emit('alert', {"incident": {"id":10, "location": {"latitude":$scope.myLat, "longitude":$scope.myLong}, "type":"accident","severity":"low"}}); 
     console.log("ALERT");
   };
 
@@ -129,6 +135,8 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
           "longitude": position.coords.longitude,
           "icon":"../img/Help.png"
         });
+        $scope.myLat= position.coords.latitude;
+        $scope.myLong= position.coords.longitude;
         $scope.respTrackPageMarkers[0].latitude= position.coords.latitude;
         $scope.respTrackPageMarkers[0].longitude= position.coords.longitude;
         $ionicLoading.hide();
@@ -155,7 +163,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
                 "longitude": allIncidents[i].location.longitude,
                 "title": 'm' + i,
                 "id" : i,
-                "icon": '../img/Hospital.png'
+                "icon": '../img/caraccident-2.png'
               });
           }
         }
