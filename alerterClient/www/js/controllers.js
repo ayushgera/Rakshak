@@ -119,8 +119,8 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     uiGmapGoogleMapApi.then(function(maps) {
       var allIncidentMarkers=[];
       $scope.respTrackPageMarkers=[
-        {"id":"alerter","title":"alerter","icon":"../img/Help.png"},
-        {"id":"responder","title":"responder","icon":"../img/Ambulance.png"}
+        {"id":"alerter","title":"alerter","icon":"img/Help.png"},
+        {"id":"responder","title":"responder","icon":"img/Ambulance.png"}
       ];
 
       $ionicLoading.show({
@@ -133,7 +133,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
           "id": "alerterMain",
           "latitude": position.coords.latitude,
           "longitude": position.coords.longitude,
-          "icon":"../img/Help.png"
+          "icon":"img/Help.png"
         });
         $scope.myLat= position.coords.latitude;
         $scope.myLong= position.coords.longitude;
@@ -163,7 +163,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
                 "longitude": allIncidents[i].location.longitude,
                 "title": 'm' + i,
                 "id" : i,
-                "icon": '../img/caraccident-2.png'
+                "icon": 'img/caraccident-2.png'
               });
           }
         }
