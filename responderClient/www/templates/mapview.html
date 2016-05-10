@@ -1,0 +1,35 @@
+<!-- List of Nearby Incidents -->
+<ion-view view-title="mapview">
+  <ion-content>
+    <!-- Map -->
+    <div class="alert-wrapper">
+        <div class="search-bar">
+          <div class="bar bar-header item-input-inset">
+            <label class="item-input-wrapper">
+              <i class="icon ion-ios-search placeholder-icon"></i>
+              <input type="search" placeholder="Search">
+            </label>
+            <div class="search-cancel">
+            <i class="ion-close-circled"></i>
+            </div>
+          </div>
+        </div>
+        <!-- Google Map -->
+        <div class="map-container">
+        <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true" options="map.options">
+            <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
+            </ui-gmap-markers>
+        </ui-gmap-google-map>
+        </div>
+        <div class="alerts-list">
+          <div class="card">
+             <div class="item item-body item-text-wrap" ng-repeat="alertCard in alertCards">
+                <img class="full-image" src="my-image.png">
+                <h2>{{alertCard.title}}</h2>
+                <p>{{alertCard.text}}</p>
+                <button ng-click='respondToServer(alertCard.alerterId)'>Respond</button>
+             </div>
+        </div>
+    </div>
+  </ion-content>
+</ion-view>
