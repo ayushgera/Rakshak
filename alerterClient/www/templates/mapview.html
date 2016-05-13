@@ -21,11 +21,28 @@
             </ui-gmap-markers>
         </ui-gmap-google-map>
         </div>
-        <div class="alert-button">
+        <div ng-hide="data.foundResponders.length>0" class="alert-button">
           <button class="button button-block button-positive" ng-click="alertServer()">
              ALERT
           </button>
         </div>
-    </div>
+        <div ng-show="alertSent && data.foundResponders.length===0" >
+          <div class="card">
+             <div class="item item-avatar">
+                <img src="img/ambulanceIcon.png">
+                <h3>No responders found yet! :(</h3>
+             </div>
+          </div>
+        </div>
+        <div ng-show="alertSent && data.foundResponders.length>0" class="alerts-list">
+          <div class="card">
+             <div class="item item-avatar item-text-wrap" ng-repeat="responderCard in responderCards">
+                <img src="img/ambulanceIcon.png">
+                <h2>{{responderCard.title}}</h2>
+                <p>{{responderCard.text}}</p>
+                <button ng-click='talkToResponder(responderCard.alerterId)'>Talk to responder</button>
+             </div>
+          </div>
+        </div>
   </ion-content>
 </ion-view>

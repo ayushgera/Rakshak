@@ -52,6 +52,8 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   $scope.alerterPageMarkers= [];
   $scope.allIncidentMarkers= [];
   $scope.respTrackPageMarkers= [];
+  $scope.responderCards= [];
+  $scope.alertSent= false;
   $scope.viewName= "alert";
   $scope.markerModel= $scope.alerterPageMarkers;
 
@@ -71,7 +73,14 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   });
 
   alerterSocket.on("found-responders",function(data){
-    $scope.data.foundResponders= JSON.stringify(data);
+    $ionicLoading.hide();
+    $scope.data.foundResponders= data;
+    var cardInfo= {
+      alerterId: data.id,
+      title: "Responder",
+      text: JSON.stringify(data.location)
+    };
+    $scope.responderCards.push(cardInfo);
   });
 
   alerterSocket.on("responder-dispatch-status",function(data){
@@ -80,6 +89,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
 
   $scope.alertServer= function(){
+    $scope.alertSent=true;
       $ionicLoading.show({
         template: 'Alert sent. Waiting for responders...'
       });
@@ -149,6 +159,18 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
         if(responderTrack){
           $scope.respTrackPageMarkers[1].latitude=responderTrack.latitude;
           $scope.respTrackPageMarkers[1].longitude=responderTrack.longitude;
+        }
+      });
+
+      $scope.$watch(function(){
+        return $scope.data.foundResponders;
+      }, function(){
+        var foundResponders= $scope.data.foundResponders;
+        if(foundResponders && foundResponders.length>0){
+          for(var i=0;i<foundResponders.length;i++){
+              $scope.respTrackPageMarkers[i].latitude= foundResponders[i].location.latitude;
+              $scope.respTrackPageMarkers[i].longitude= foundResponders[i].location.longitude;
+          }
         }
       });
 

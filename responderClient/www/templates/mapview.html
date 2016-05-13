@@ -23,8 +23,8 @@
         </div>
         <div class="alerts-list">
           <div class="card">
-             <div class="item item-body item-text-wrap" ng-repeat="alertCard in alertCards">
-                <img class="full-image" src="my-image.png">
+             <div class="item item-avatar item-text-wrap" ng-repeat="alertCard in alertCards">
+                <img src="img/Help.png">
                 <h2>{{alertCard.title}}</h2>
                 <p>{{alertCard.text}}</p>
                 <button ng-click='respondToServer(alertCard.alerterId)'>Respond</button>
@@ -33,3 +33,19 @@
     </div>
   </ion-content>
 </ion-view>
+
+<script id = "pleaseRespond.html" type = "text/ng-template">
+   <ion-modal-view>
+      <ion-header-bar>
+         <h1 class = "title">Help Needed!</h1>
+      </ion-header-bar>
+    
+      <ion-content>
+        <p>
+            Your help is needed. Please respond if available.
+        </p>
+         <button class = "button icon icon-left ion-ios-close-outline"
+            ng-click = "closeModal()">OK</button>
+      </ion-content>
+   </ion-modal-view>
+</script>

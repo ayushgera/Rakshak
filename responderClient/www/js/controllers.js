@@ -45,7 +45,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   };
 })
 
-.controller('SASController', function($scope, $geolocation, responderSocket, uiGmapGoogleMapApi, $ionicLoading){
+.controller('SASController', function($scope, $geolocation, responderSocket, uiGmapGoogleMapApi, $ionicLoading, $ionicPopup){
   $scope.markerId= 0;
   $scope.data= {};
   $scope.trackResponderLocations= [];
@@ -55,6 +55,43 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   $scope.viewName= "respond";
   $scope.markerModel= $scope.alerterPageMarkers;
   $scope.alertCards=[];
+
+  /**MODAL START**/
+
+  /* $ionicModal.fromTemplateUrl('pleaseRespond.html', {
+      scope: $scope,
+      animation: 'slide-in-up'
+   }).then(function(modal) {
+      $scope.pleaseRespondModal = modal;
+   });
+  
+   $scope.openModal = function() {
+      $scope.pleaseRespondModal.show();
+   };
+  
+   $scope.closeModal = function() {
+      $scope.pleaseRespondModal.hide();
+   };
+  
+   //Cleanup the modal when we're done with it!
+   $scope.$on('$destroy', function() {
+      $scope.pleaseRespondModal.remove();
+   });*/
+
+    // An alert dialog
+   $scope.openModal = function() {
+     var alertPopup = $ionicPopup.alert({
+       title: 'Help!',
+       template: 'An incident occured close to you. Please respond if available.'
+     });
+
+     alertPopup.then(function(res) {
+       console.log('Acknowledged');
+     });
+   };
+
+  /**MODAL END**/
+
   responderSocket.on("all-incidents",function(data){
     $scope.data.allIncidents= data;
   });
@@ -70,12 +107,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   });
 
   responderSocket.on("please-respond",function(data){
-    var cardInfo= {
-      alerterId: data.incident.alerterId,
-      title: "Alert",
-      text: JSON.stringify(data.incident.location)
-    };
-    $scope.alertCards.push(cardInfo);
+    $scope.openModal();
   });
 
   responderSocket.on("found-responders",function(data){
@@ -112,17 +144,6 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     zoom: 13, 
     options: {disableDefaultUI: true} 
   };
-
-  //update markermodel whenever view changes    
-  /*$scope.$watch(function(){
-    return $scope.$parent.$parent.viewName;
-  }, function(){
-    if($scope.$parent.$parent.viewName==="incidents"){
-      $scope.markerModel= $scope.allIncidentMarkers;
-    }else if($scope.$parent.$parent.viewName==="responder"){
-      $scope.markerModel= $scope.respTrackPageMarkers;
-    }
-  });*/
 
   // uiGmapGoogleMapApi is a promise.
     // The "then" callback function provides the google.maps object.
