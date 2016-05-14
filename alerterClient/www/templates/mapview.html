@@ -40,6 +40,10 @@
                 <img src="img/ambulanceIcon.png">
                 <h2>{{responderCard.title}}</h2>
                 <p>{{responderCard.text}}</p>
+                <span ng-show="responderCard.responderId==data.responded.responder.responderId">
+                  <i class="icon ion-checkmark-circled"></i>
+                  <p>Responded</p>
+                </span>
                 <button ng-click='talkToResponder(responderCard.alerterId)'>Talk to responder</button>
              </div>
           </div>

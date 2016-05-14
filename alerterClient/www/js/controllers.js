@@ -66,21 +66,20 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   });
 
   alerterSocket.on("responded",function(data){
-    $scope.data.responded= JSON.stringify(data);
-    if($scope.data.responded && $scope.data.responded.length>0){
-      $ionicLoading.hide();
-    }
+    $scope.data.responded= data;
   });
 
   alerterSocket.on("found-responders",function(data){
     $ionicLoading.hide();
     $scope.data.foundResponders= data;
-    var cardInfo= {
-      alerterId: data.id,
-      title: "Responder",
-      text: JSON.stringify(data.location)
-    };
-    $scope.responderCards.push(cardInfo);
+      for(var i=0;i<data.length;i++){
+      var cardInfo= {
+        responderId: data[i].id,
+        title: "Responder",
+        text: JSON.stringify(data[i].location)
+      };
+      $scope.responderCards.push(cardInfo);
+    }
   });
 
   alerterSocket.on("responder-dispatch-status",function(data){

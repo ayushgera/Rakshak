@@ -58,27 +58,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
   /**MODAL START**/
 
-  /* $ionicModal.fromTemplateUrl('pleaseRespond.html', {
-      scope: $scope,
-      animation: 'slide-in-up'
-   }).then(function(modal) {
-      $scope.pleaseRespondModal = modal;
-   });
-  
-   $scope.openModal = function() {
-      $scope.pleaseRespondModal.show();
-   };
-  
-   $scope.closeModal = function() {
-      $scope.pleaseRespondModal.hide();
-   };
-  
-   //Cleanup the modal when we're done with it!
-   $scope.$on('$destroy', function() {
-      $scope.pleaseRespondModal.remove();
-   });*/
-
-    // An alert dialog
+   // An alert dialog
    $scope.openModal = function() {
      var alertPopup = $ionicPopup.alert({
        title: 'Help!',
@@ -124,11 +104,25 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
   $scope.respondToServer= function(alerterId) { // Note this is a function
     console.log("alerter id: "+alerterId);
-    responderSocket.emit('respond', {"alerterId":alerterId, "location":{"latitude":22.234435,"longitude":77.43345}});
+    responderSocket.emit('respond', 
+      {
+        "alerterId":alerterId, 
+        "location":{
+          "latitude":$scope.myLat,
+          "longitude":$scope.myLong
+        }
+      });
 
     setInterval(function(){
-          responderSocket.emit("responder-dispatch-status",{"alerterId":alerterId, "location":{"latitude":9.9999,"longitude":99.9999}});
-      },1000);
+          responderSocket.emit("responder-dispatch-status",
+            {
+              "alerterId":alerterId, 
+              "location":{
+                "latitude":$scope.myLat,
+                "longitude":$scope.myLong
+              }
+            });
+      },5000);
   };
 
   $scope.$on('changeView', function(event, viewName) { 
@@ -160,16 +154,32 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
       navigator.geolocation
       .getCurrentPosition(function (position) {
+        var icon = {
+            url: "img/ambulanceIcon.png", // url
+            scaledSize: new google.maps.Size(50, 50), // scaled size
+            origin: new google.maps.Point(0,0), // origin
+            anchor: new google.maps.Point(0, 0) // anchor
+        };
         $scope.alerterPageMarkers.push({
           "id": "alerterMain",
           "latitude": position.coords.latitude,
           "longitude": position.coords.longitude,
-          "icon":"img/Help.png"
+          "icon":icon
         });
         $scope.myLat= position.coords.latitude;
         $scope.myLong= position.coords.longitude;
         $scope.respTrackPageMarkers[0].latitude= position.coords.latitude;
         $scope.respTrackPageMarkers[0].longitude= position.coords.longitude;
+
+        //send location information to the server
+        responderSocket.emit('responder-information', 
+          {
+            "location": {
+              "latitude": $scope.myLat,
+              "longitude": $scope.myLong
+            }
+          });
+
         $ionicLoading.hide();
       });
 
