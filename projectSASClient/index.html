@@ -22,6 +22,8 @@
     <script src='./bower_components/angular-simple-logger/dist/angular-simple-logger.min.js'></script>
     <script src='./bower_components/angular-google-maps/dist/angular-google-maps.js'></script>
     <script src="./bower_components/ngGeolocation/ngGeolocation.min.js"></script>
+    <script src="./app/model/dataService.js"></script>
+    <script src="./app/model/locationService.js"></script>
     <script src="./app/services/SASService.js"></script>
     <script src="./app/SASController.js"></script>
     <style>
@@ -29,6 +31,7 @@
             height: 400px; 
         }
     </style>
+
 </head>
 <body ng-controller="SASController">
 <div>
@@ -49,10 +52,11 @@
     <!-- Map -->
     <div>
         <!-- Google Map -->
-        <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true">
+        <!--<ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true">
             <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
             </ui-gmap-markers>
-        </ui-gmap-google-map>
+        </ui-gmap-google-map>-->
+        <div ng-view></div>
 
     </div>
     <hr/>
@@ -62,6 +66,18 @@
           Created by Ayush Gera for Project Save a soul
         </p>
     </div>
+
+          <script type="text/ng-template" id="gmap.html">
+       <!-- Map -->
+        <div>
+            <!-- Google Map -->
+            <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true">
+                <ui-gmap-markers models='markerModel' fit="true" coords="'self'" icon="'icon'">
+                </ui-gmap-markers>
+            </ui-gmap-google-map>
+
+        </div>
+      </script>
 </div>
 </body>
 </html>

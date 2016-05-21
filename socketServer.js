@@ -87,35 +87,54 @@ module.exports= function(io){
         //find the corresponding responder objects and broadcast to all to see what all responders have been alerted
         var foundResponders= responderFinder.findRespondersFromSockets(foundResponderSockets);
         //TODO: foundResponders should be synchronously handled once retrieved from db
-        io.of('responder').emit("found-responders",foundResponders);
-        io.of('alerter').emit("found-responders",foundResponders);
+        //io.of('responder').emit("found-responders",foundResponderSockets);
+        alerter.emit("found-responders",foundResponders);
       }
 
     });
   });
 
   io.of('responder').on('connection', function (responder) {
-
+    //responderSockets.push(responder);
     responder.emit("all-incidents",dbService.getAllIncidents());
     //TODO: see if cane be made better, use this location to search of near responders
     responder.on("responder-information", function(responderInfo){
       responder.location=responderInfo.location;
-      responder.id=responderInfo.id;
+      responder.userId=responderInfo.userId;
       responderSockets.push(responder);
     });
 
     responder.on('respond', function (data) { //TODO: data has alerter id
+      //save responder socket id of the one who responded, so that client can communicate with him
+      data.responderId= responder.id;
       respondingResponderSockets.push(responder);
-      responder.emit("responded",data.responder);
-      responder.broadcast.emit("responded",data.responder);
-      io.of('alerter').emit("responded",data.responder); //sends responded event to update all alerters and responders connected 
+      responder.emit("responded",data);
+      //TODO:send only to the ones who were alerted
+      responder.broadcast.emit("responded",data);
+      io.of('alerter').to(data.alerterId).emit("responded",
+        {
+          "responder":{
+            "responderId":responder.id,
+            "location":data.location
+            }
+        }); //sends responded event to update all alerters and responders connected 
 
       console.log("!!!!!RESPOND!!!!!!!");
     });
 
     responder.on('responder-dispatch-status', function(data){
-      io.of('alerter').to(data.alerterId).emit("responder-dispatch-status",{"latitude":data.location.latitude,"longitude":data.location.longitude});
+      io.of('alerter').to(data.alerterId).emit("responder-dispatch-status",
+        {
+          "latitude":data.location.latitude,
+          "longitude":data.location.longitude
+        });
     });
 
+    responder.on('disconnect', function() {
+      console.log('A Responder disconnected!');
+
+      var i = responderSockets.indexOf(responder);
+      responderSockets.splice(i, 1);
+    });
   });
 }

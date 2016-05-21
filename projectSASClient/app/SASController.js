@@ -1,40 +1,79 @@
 // Creates the SASApp Module and Controller. Note that it depends on the 'SAS.services' module and service.
-var SASApp = angular.module('SASApp', ['SAS.services', 'uiGmapgoogle-maps', 'ngGeolocation']);
+var SASApp = angular.module('SASApp', ['SAS.services', 'SAS.dataService', 'uiGmapgoogle-maps', 'ngRoute']);
 
 //load google map
-SASApp.config(function(uiGmapGoogleMapApiProvider) {
-    uiGmapGoogleMapApiProvider.configure({
-        key: 'AIzaSyB16sGmIekuGIvYOfNoW9T44377IU2d2Es',
+SASApp.config(['uiGmapGoogleMapApiProvider','$routeProvider', function(uiGmapGoogleMapApiProvider, $routeProvider) {
+	uiGmapGoogleMapApiProvider.configure({
+		key: 'AIzaSyB16sGmIekuGIvYOfNoW9T44377IU2d2Es',
         v: '3.20' //defaults to latest 3.X anyhow
     });
+
+
+    /**
+	 * router uses resolve, uses a service which gives marker groups
+	 * view1: all inc and new inc, and loc
+	 * view 2: loc, nearby resp, hosp
+	 * view 3: track: loc and responder
+     **/
+
+	$routeProvider.
+	when('/responder', {
+		templateUrl: 'gmap.html',
+		controller: 'SASSubController',
+		resolve: {
+			markerModel: ['dataModel', function(dataModel){
+				return dataModel.getResponderTrackViewMarkers();
+			}]
+		}
+		}).
+	when('/allIncidents', {
+		templateUrl: 'gmap.html',
+		controller: 'SASSubController',
+		resolve: {
+			markerModel: ['dataModel', function(dataModel){
+				return dataModel.getAllIncidentsViewMarkers();
+			}]
+		}
+	}).
+	otherwise({
+		redirectTo: '/responder'
+	});
+}]);
+
+SASApp.controller('SASSubController', function(markerModel){
+	markerModel.then(function(markers){
+		$scope.markerModel=markers;
+	},function(error){
+		alert("OOOPS!"+ error)
+	});
 });
 
-SASApp.controller('SASController', function($scope, $geolocation, alerterSocket, uiGmapGoogleMapApi){
+SASApp.controller('SASController', function($scope, alerterSocket, dataModel, uiGmapGoogleMapApi){
 	$scope.markerId= 0;
-	$scope.data= {};
 	$scope.trackResponderLocations= [];
 	$scope.allIncidentMarkers= [];
 	$scope.respondersDispatched= [];
+	
 	$scope.viewName="responder";
 
 	alerterSocket.on("all-incidents",function(data){
-		$scope.data.allIncidents= data;
+		dataModel.setAllIncidents(data);
 	});
 
 	alerterSocket.on("new-incident",function(data){
-		$scope.data.newIncident= JSON.stringify(data);
+		dataModel.setNewIncident(data);
 	});
 
 	alerterSocket.on("responded",function(data){
-		$scope.data.responded= JSON.stringify(data);
+		dataModel.setResponded(data);
 	});
 
 	alerterSocket.on("found-responders",function(data){
-		$scope.data.foundResponders= JSON.stringify(data);
+		dataModel.setFoundResponders(data);
 	});
 
 	alerterSocket.on("responder-dispatch-status",function(data){
-		$scope.data.trackResponderLocation=data;
+		dataModel.setTrackResponderLocation(data);
 	});
 
 
@@ -46,101 +85,10 @@ SASApp.controller('SASController', function($scope, $geolocation, alerterSocket,
 	$scope.map = { center: { latitude: 45, longitude: -73 }, zoom: 13 };
 
 
-
-
-	/*$scope.marker = {
-	      id: 0,
-	      coords: {
-	        latitude: 40.1451,
-	        longitude: -99.6680
-	      },
-	      options: { draggable: true },
-	      events: {
-	        dragend: function (marker, eventName, args) {
-	          var lat = marker.getPosition().lat();
-	          var lon = marker.getPosition().lng();
-
-	          $scope.marker.options = {
-	            draggable: true,
-	            labelContent: "lat: " + $scope.marker.coords.latitude + ' ' + 'lon: ' + $scope.marker.coords.longitude,
-	            labelAnchor: "100 0",
-	            labelClass: "marker-labels"
-	          };
-	        }
-	      }
-	    };*/
-
-	//update markermodel whenever view changes    
-	$scope.$watch(function(){
-		return $scope.viewName;
-	}, function(){
-		if($scope.viewName==="incidents"){
-			$scope.markerModel= $scope.allIncidentMarkers;
-		}else if($scope.viewName==="responder"){
-			$scope.markerModel= $scope.respondersDispatched;
-		}
-	});
-
-
 	// uiGmapGoogleMapApi is a promise.
     // The "then" callback function provides the google.maps object.
     uiGmapGoogleMapApi.then(function(maps) {
-    	var allIncidentMarkers=[];
-    	$scope.respondersDispatched=[{"id":9999,"title":"alerter"},{"id":1111,"title":"responder"}];
     	
-    	//this is your location
-    	$geolocation.getCurrentPosition({
-            timeout: 60000
-         }).then(function(position) {
-            $scope.respondersDispatched[0].latitude= position.coords.latitude;
-    		$scope.respondersDispatched[0].longitude= position.coords.longitude;
-         });
-    	
-    	var lat=22.1111, longi=77.123;
-    	
-    	$scope.$watch(function(){
-    		return $scope.data.allIncidents;
-    	}, function(){
-    		var allIncidents= $scope.data.allIncidents;
-    		if(allIncidents){
-    			for(var i=0;i< allIncidents.length;i++){
-		    		allIncidentMarkers.push({
-			        	"latitude": allIncidents[i].location.latitude,
-			        	"longitude": allIncidents[i].location.longitude,
-			        	"title": 'm' + i,
-			      		"id" : i
-			      	});
-    			}
-    		}
-    		$scope.allIncidentMarkers= allIncidentMarkers;
-    	});
-
-
-    	$scope.$watch(function(){
-    		return $scope.data.trackResponderLocation;
-    	}, function(){
-    		var responderTrack= $scope.data.trackResponderLocation;
-    		if(responderTrack){
-    			$scope.respondersDispatched[1].latitude=responderTrack.latitude;
-    			$scope.respondersDispatched[1].longitude=responderTrack.longitude;
-    		}
-    	});
-    	
-    	/*$scope.$watch(function(){
-    		return $scope.data.trackResponderLocation;
-    	}, function(){
-    		var responderTrack= $scope.data.trackResponderLocation;
-
-    		var responder = {
-		      	coords: {
-		        	latitude: responderTrack.latitude,
-		        	longitude: responderTrack.longitude
-		      	},
-		      	id: Date.now()
-		  	};
-
-		  	$scope.trackResponderLocations.push(responder);
-    	});*/
-    });
+	});
 
 });
