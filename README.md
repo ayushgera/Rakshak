@@ -14,6 +14,14 @@ Following services can be created as modules and developed independently:
 * **ResponderTrackService**: Takes input an array of responder objects, and sets polling with some time interval, calls locationservice, outputs location array corresponding to the array. Use this to send to the alerter through router.
 * **RegisterService**: takes input a client object(responder or alerter), and inputs type of service, and registers the client to the service like push notification. How to do this for sockets?
 
+
+### Branches ###
+
+* Master : would contain the release code (not up to date yet)
+* Feature : updated code, all Pull Requests to be made here
+* IonicClientMain : updated client code
+
+
 ### Contributors ###
 
 * Ayush Gera
