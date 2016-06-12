@@ -1,4 +1,4 @@
-angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngGeolocation'])
+angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngGeolocation', 'ionic-pullup'])
 
 .controller('AppCtrl', function($scope, $ionicModal, $timeout) {
 
@@ -45,7 +45,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   };
 })
 
-.controller('SASController', function($scope, $geolocation, alerterSocket, uiGmapGoogleMapApi, uiGmapIsReady, $ionicLoading){
+.controller('SASController', function($scope, $geolocation, alerterSocket, uiGmapGoogleMapApi, uiGmapIsReady, $ionicLoading, $ionicPopup){
   $scope.markerId= 0;
   $scope.data= {};
   $scope.trackResponderLocations= [];
@@ -54,8 +54,10 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   $scope.respTrackPageMarkers= [];
   $scope.responderCards= [];
   $scope.alertSent= false;
+  $scope.alertSentClass= "";
   $scope.viewName= "alert";
   $scope.markerModel= $scope.alerterPageMarkers;
+  $scope.pullText="See Responders";
 
   alerterSocket.on("all-incidents",function(data){
     $scope.data.allIncidents= data;
@@ -68,7 +70,29 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   alerterSocket.on("responded",function(data){
     $scope.data.responded= data;
     $scope.data.trackResponderLocation= data.responder.location;
+    $scope.openModal(data.responder);
   });
+
+    /**MODAL START**/
+
+   // On respond dialog
+   $scope.openModal = function(responder) {
+    var text="";
+    for(var i=0;i<$scope.responderCards.length;i++){
+      if(responder.responderId===$scope.responderCards[i].responderId){
+        text+=$scope.responderCards[i].text;
+      }
+    }
+     var alertPopup = $ionicPopup.alert({
+       title: 'Help dispatched!',
+       template: 'Hold on. Help has been dispatched.<br>'+text
+     });
+     alertPopup.then(function(res) {
+       console.log('Acknowledged');
+     });
+   };
+
+  /**MODAL END**/
 
   alerterSocket.on("found-responders",function(data){
     $ionicLoading.hide();
@@ -137,6 +161,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
   $scope.alertServer= function(){
     $scope.alertSent=true;
+    $scope.alertSentClass="map-container-alert-sent";
       $ionicLoading.show({
         template: 'Alert sent. Waiting for responders...'
       });
@@ -149,13 +174,20 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   });
 
   $scope.changeView= function(viewName){
+    if(!$scope.alertSent){
+      $scope.alertSentClass="";
+    }
+    $scope.pullText ="See Responders";
     if(viewName==="alert"){
       $scope.markerModel= $scope.alerterPageMarkers;
     }else if(viewName==="responder"){
       $scope.markerModel= $scope.respTrackPageMarkers;
     }else if (viewName==="incidents") {
       $scope.markerModel= $scope.allIncidentMarkers;
+      $scope.alertSentClass="map-container-alert-sent";
+      $scope.pullText ="See All Incidents";
     }
+    $scope.viewName= viewName;
   };
 
   $scope.map = { 

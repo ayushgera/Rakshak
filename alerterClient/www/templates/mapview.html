@@ -1,5 +1,5 @@
 <!-- List of Nearby Incidents -->
-<ion-view view-title="mapview">
+<ion-view view-title="Rakshak- Alerter">
   <ion-content>
     <!-- Map -->
     <div class="alert-wrapper">
@@ -15,15 +15,15 @@
           </div>
         </div>
         <!-- Google Map -->
-        <div class="map-container">
-        <ui-gmap-google-map events="map.events" center='map.center' zoom='map.zoom' draggable="true" options="map.options">
-            <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
-            </ui-gmap-markers>
-        </ui-gmap-google-map>
+        <div class="map-container" ng-class="alertSentClass">
+          <ui-gmap-google-map events="map.events" center='map.center' zoom='map.zoom' draggable="true" options="map.options">
+              <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
+              </ui-gmap-markers>
+          </ui-gmap-google-map>
         </div>
-        <div ng-hide="data.foundResponders.length>0" class="alert-button">
-          <button class="button button-block button-positive" ng-click="alertServer()">
-             ALERT
+        <div ng-hide="data.foundResponders.length>0 || viewName==='incidents'" class="alert-button">
+          <button class="button button-block button-assertive alert-button-block" ng-click="alertServer()">
+             <h1 style="color:white;">ALERT</h1>
           </button>
         </div>
         <div ng-show="alertSent && data.foundResponders.length===0" >
@@ -34,25 +34,46 @@
              </div>
           </div>
         </div>
-        <div ng-show="alertSent && data.foundResponders.length>0" class="alerts-list">
-          <div class="card">
-             <div class="item item-avatar item-text-wrap" ng-repeat="responderCard in responderCards">
-                <img src="img/ambulanceIcon.png">
-                <h2>{{responderCard.title}}</h2>
-                <h2 ng-bing="responderCard.distance">{{responderCard.distance}}</h2>
-                <p ng-bing="responderCard.text">{{responderCard.text}}</p>
-                <span ng-show="responderCard.responderId===data.responded.responder.responderId">
-                  <span>
-                    <i class="icon ion-checkmark-circled"></i>
-                    <p>Responded</p>
-                    <button class="button button-positive" ng-click="changeView('responder')">
-                       Track
-                    </button>
-                  </span>
-                </span>
-                <button class="button button-positive" ng-click='talkToResponder(responderCard.alerterId)'>Talk to responder</button>
-             </div>
-          </div>
-        </div>
+        
+        <ion-pull-up-footer ng-show="viewName==='incidents' || alertSent && data.foundResponders.length>0" class="bar-positive">
+            <div class="title" ion-pull-up-trigger>{{pullText}}</div>
+            <ion-pull-up-handle width="120" height="15" icon-expand="ion-chevron-up" icon-collapse="ion-chevron-down" style="border-radius: 5px 5px 0 0">
+            </ion-pull-up-handle>
+            <ion-pull-up-content scroll="false">
+                <div ng-show="alertSent && data.foundResponders.length>0 && viewName!=='incidents'" class="alerts-list">
+                  <div class="card">
+                    <div class="item item-avatar item-text-wrap" ng-repeat="responderCard in responderCards">
+                      <img src="img/ambulanceIcon.png">
+                      <h2>{{responderCard.title}}</h2>
+                      <h2>{{responderCard.distance}}</h2>
+                      <p>{{responderCard.text}}</p>
+                      <span ng-show="responderCard.responderId===data.responded.responder.responderId">
+                        <span>
+                          <i class="icon ion-checkmark-circled"></i>
+                          <p>Responded</p>
+                          <button class="button button-positive" ng-click="changeView('responder')">
+                             Track
+                          </button>
+                        </span>
+                      </span>
+                      <button class="button button-positive" ng-click='talkToResponder(responderCard.alerterId)'>Talk to responder</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div ng-show="viewName==='incidents'" class="alerts-list">
+                  <div class="card">
+                    <div class="item item-avatar item-text-wrap" ng-repeat="incident in data.allIncidents">
+                      <img src="img/ambulanceIcon.png">
+                      <h2>{{incident.type}}</h2>
+                      <h2 >{{incident.date}}</h2>
+                      <p style="font-weight: bold;">Personal injury: </p><p >{{incident.severity}}</p>
+                      <p style="font-weight: bold;">Status: </p><p >{{incident.status}}</p>
+                      <p style="font-weight: bold;">Location: </p><p>{{incident.location.latitude}} , {{incident.location.longitude}}</p>                    
+                    </div>
+                  </div>
+                </div>
+            </ion-pull-up-content>
+          </ion-pull-up-footer>
   </ion-content>
 </ion-view>
