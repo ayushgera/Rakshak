@@ -45,7 +45,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   };
 })
 
-.controller('SASController', function($scope, $geolocation, alerterSocket, uiGmapGoogleMapApi, $ionicLoading){
+.controller('SASController', function($scope, $geolocation, alerterSocket, uiGmapGoogleMapApi, uiGmapIsReady, $ionicLoading){
   $scope.markerId= 0;
   $scope.data= {};
   $scope.trackResponderLocations= [];
@@ -67,6 +67,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
   alerterSocket.on("responded",function(data){
     $scope.data.responded= data;
+    $scope.data.trackResponderLocation= data.responder.location;
   });
 
   alerterSocket.on("found-responders",function(data){
@@ -76,11 +77,58 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
       var cardInfo= {
         responderId: data[i].id,
         title: "Responder",
-        text: JSON.stringify(data[i].location)
+        distance: "Getting distance...",
+        text: "Getting location...",
+        location: data[i].location
       };
       $scope.responderCards.push(cardInfo);
+      $scope.addDistance($scope.responderCards);
     }
   });
+
+
+  $scope.addDistance= function(responderCards){
+    var geocoder = new google.maps.Geocoder;
+    var service = new google.maps.DistanceMatrixService;
+    for(var i=0;i<$scope.responderCards.length;i++){
+      (function(index){
+          setTimeout(function(){
+            service.getDistanceMatrix({
+              origins: [{lat: $scope.responderCards[index].location.latitude, lng: $scope.responderCards[index].location.longitude}],
+              destinations: [{lat:$scope.myLat,lng:$scope.myLong}],
+              travelMode: google.maps.TravelMode.DRIVING,
+              unitSystem: google.maps.UnitSystem.METRIC,
+              avoidHighways: false,
+              avoidTolls: false
+            }, function(response, status) {
+              if (status !== google.maps.DistanceMatrixStatus.OK) {
+                console.log("ERROR retrieving distance for responder: "+$scope.responderCards[i].responderId);
+                return;
+              }
+
+              var originList = response.originAddresses;
+              var destinationList = response.destinationAddresses;
+              var distanceText="",address="";
+              for (var i = 0; i < originList.length; i++) {
+                var results = response.rows[i].elements;
+                for (var j = 0; j < results.length; j++) {
+                  /*distanceText += originList[i] + ' to ' + destinationList[j] +
+                      ': ' + results[j].distance.text + ' in ' +
+                      results[j].duration.text;*/
+                      distanceText= results[j].distance.text + 'away. Time to reach : ' +results[j].duration.text;
+                      address= originList[i];
+                }
+              }
+              $scope.$apply(function(){
+                $scope.responderCards[index].text= distanceText;
+                $scope.responderCards[index].distance= address;
+              });
+            })
+          }, index*100)
+      })(i);
+      
+    }
+  };
 
   alerterSocket.on("responder-dispatch-status",function(data){
     $scope.data.trackResponderLocation=data;
@@ -97,6 +145,10 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   };
 
   $scope.$on('changeView', function(event, viewName) { 
+    $scope.changeView(viewName);
+  });
+
+  $scope.changeView= function(viewName){
     if(viewName==="alert"){
       $scope.markerModel= $scope.alerterPageMarkers;
     }else if(viewName==="responder"){
@@ -104,12 +156,19 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     }else if (viewName==="incidents") {
       $scope.markerModel= $scope.allIncidentMarkers;
     }
-  });
+  };
 
   $scope.map = { 
     center: { latitude: 45, longitude: -73 }, 
     zoom: 13, 
-    options: {disableDefaultUI: true} 
+    options: {disableDefaultUI: true},
+    events: {
+      click: function(map, eventName, originalEventArgs){
+        $scope.apply(function(){
+          var x=0;
+        });
+      }
+    }
   };
 
   //update markermodel whenever view changes    
@@ -164,13 +223,13 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
       $scope.$watch(function(){
         return $scope.data.foundResponders;
       }, function(){
-        var foundResponders= $scope.data.foundResponders;
+        /*var foundResponders= $scope.data.foundResponders;
         if(foundResponders && foundResponders.length>0){
           for(var i=0;i<foundResponders.length;i++){
               $scope.respTrackPageMarkers[i].latitude= foundResponders[i].location.latitude;
               $scope.respTrackPageMarkers[i].longitude= foundResponders[i].location.longitude;
           }
-        }
+        }*/
       });
 
       $scope.$watch(function(){
@@ -190,7 +249,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
         }
         $scope.allIncidentMarkers= allIncidentMarkers;
       });
-      
-    });
+      return uiGmapIsReady.promise(1);
+    }).then();
 
 });

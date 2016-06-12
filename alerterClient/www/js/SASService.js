@@ -3,7 +3,7 @@ var services= angular.module('SAS.services',[]);
 // We define a factory the socket service is instantiated only once, and
 // thus act as a singleton for the scope of the application
 services.factory('alerterSocket', function ($rootScope) {
-  var socket = io.connect('https://sleepy-caverns-38132.herokuapp.com/alerter');//'https://sleepy-caverns-38132.herokuapp.com/alerter');
+  var socket = io.connect('http://127.0.0.1:3000/alerter');//'https://sleepy-caverns-38132.herokuapp.com/alerter');
   return {
     on: function (eventName, callback) {
       socket.on(eventName, function () {

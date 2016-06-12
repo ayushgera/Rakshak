@@ -16,7 +16,7 @@
         </div>
         <!-- Google Map -->
         <div class="map-container">
-        <ui-gmap-google-map center='map.center' zoom='map.zoom' draggable="true" options="map.options">
+        <ui-gmap-google-map events="map.events" center='map.center' zoom='map.zoom' draggable="true" options="map.options">
             <ui-gmap-markers models="markerModel" fit="true" coords="'self'" icon="'icon'">
             </ui-gmap-markers>
         </ui-gmap-google-map>
@@ -39,12 +39,18 @@
              <div class="item item-avatar item-text-wrap" ng-repeat="responderCard in responderCards">
                 <img src="img/ambulanceIcon.png">
                 <h2>{{responderCard.title}}</h2>
-                <p>{{responderCard.text}}</p>
-                <span ng-show="responderCard.responderId==data.responded.responder.responderId">
-                  <i class="icon ion-checkmark-circled"></i>
-                  <p>Responded</p>
+                <h2 ng-bing="responderCard.distance">{{responderCard.distance}}</h2>
+                <p ng-bing="responderCard.text">{{responderCard.text}}</p>
+                <span ng-show="responderCard.responderId===data.responded.responder.responderId">
+                  <span>
+                    <i class="icon ion-checkmark-circled"></i>
+                    <p>Responded</p>
+                    <button class="button button-positive" ng-click="changeView('responder')">
+                       Track
+                    </button>
+                  </span>
                 </span>
-                <button ng-click='talkToResponder(responderCard.alerterId)'>Talk to responder</button>
+                <button class="button button-positive" ng-click='talkToResponder(responderCard.alerterId)'>Talk to responder</button>
              </div>
           </div>
         </div>

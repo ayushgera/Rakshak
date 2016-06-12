@@ -1,5 +1,5 @@
 <!-- List of Nearby Incidents -->
-<ion-view view-title="mapview">
+<ion-view view-title="Rakshak">
   <ion-content>
     <!-- Map -->
     <div class="alert-wrapper">
@@ -23,11 +23,15 @@
         </div>
         <div class="alerts-list">
           <div class="card">
-             <div class="item item-avatar item-text-wrap" ng-repeat="alertCard in alertCards">
+             <div class="item item-avatar item-text-wrap" ng-show="alertCards.length>0" ng-repeat="alertCard in alertCards">
                 <img src="img/Help.png">
                 <h2>{{alertCard.title}}</h2>
                 <p>{{alertCard.text}}</p>
-                <button ng-click='respondToServer(alertCard.alerterId)'>Respond</button>
+                <button class="button button-positive" ng-click='respondToServer(alertCard.alerterId)'>Respond</button>
+             </div>
+             <div class="item item-avatar item-text-wrap" ng-show="alertCards.length==0">
+                <img src="img/Help.png">
+                <h2>No Alerts Nearby!</h2>
              </div>
         </div>
     </div>

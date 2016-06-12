@@ -45,16 +45,33 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
   };
 })
 
-.controller('SASController', function($scope, $geolocation, responderSocket, uiGmapGoogleMapApi, $ionicLoading, $ionicPopup){
+.controller('SASController', function($scope, $geolocation, responderSocket, uiGmapGoogleMapApi, uiGmapIsReady, $ionicLoading, $ionicPopup){
   $scope.markerId= 0;
   $scope.data= {};
   $scope.trackResponderLocations= [];
-  $scope.alerterPageMarkers= [];
+  $scope.alerterPageMarkers= [{"id":"responder"},{"id":"alerter"}];
   $scope.allIncidentMarkers= [];
   $scope.respTrackPageMarkers= [];
   $scope.viewName= "respond";
   $scope.markerModel= $scope.alerterPageMarkers;
   $scope.alertCards=[];
+  //saves alerters with location and socket id to track
+  $scope.alerters=[];
+
+  $scope.findAlerterLocation = function(alerterId){
+    for(var i=0;i<$scope.alerters.length;i++){
+      if($scope.alerters[i].alerterId===alerterId){
+        return $scope.alerters[i].location;
+      }
+    }
+  };
+
+  //TODO: remove the following location mock algorithm
+  $scope.getRandLocation= function(minLat, maxLat, minLong, maxLong) {   
+    var lat= Math.random() * (maxLat - minLat) + minLat;
+    var long= Math.random() * (maxLong - minLong) + minLong;
+    return {"latitude":lat,"longitude":long};
+  };
 
   /**MODAL START**/
 
@@ -84,6 +101,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
       text: JSON.stringify(data.incident.location)
     };
     $scope.alertCards.push(cardInfo);
+    $scope.alerters.push({alerterId:data.incident.alerterId,location:data.incident.location});
   });
 
   responderSocket.on("please-respond",function(data){
@@ -102,28 +120,7 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
     $scope.data.trackResponderLocation=data;
   });
 
-  $scope.respondToServer= function(alerterId) { // Note this is a function
-    console.log("alerter id: "+alerterId);
-    responderSocket.emit('respond', 
-      {
-        "alerterId":alerterId, 
-        "location":{
-          "latitude":$scope.myLat,
-          "longitude":$scope.myLong
-        }
-      });
 
-    setInterval(function(){
-          responderSocket.emit("responder-dispatch-status",
-            {
-              "alerterId":alerterId, 
-              "location":{
-                "latitude":$scope.myLat,
-                "longitude":$scope.myLong
-              }
-            });
-      },5000);
-  };
 
   $scope.$on('changeView', function(event, viewName) { 
     if(viewName==="respond"){
@@ -135,13 +132,49 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
 
   $scope.map = { 
     center: { latitude: 45, longitude: -73 }, 
-    zoom: 13, 
+    zoom: 10, 
     options: {disableDefaultUI: true} 
   };
 
   // uiGmapGoogleMapApi is a promise.
     // The "then" callback function provides the google.maps object.
     uiGmapGoogleMapApi.then(function(maps) {
+        
+        $scope.directionsService = new maps.DirectionsService();
+        $scope.directionsDisplay = new maps.DirectionsRenderer({suppressMarkers: true});
+
+        $scope.respondToServer= function(alerterId) {
+        console.log("alerter id: "+alerterId);
+        responderSocket.emit('respond', 
+          {
+            "alerterId":alerterId, 
+            "location":{
+              "latitude":$scope.myLat,
+              "longitude":$scope.myLong
+            }
+          });
+
+        setInterval(function(){
+              responderSocket.emit("responder-dispatch-status",
+                {
+                  "alerterId":alerterId, 
+                  "location":{
+                    "latitude":$scope.myLat,
+                    "longitude":$scope.myLong
+                  }
+                });
+          },5000);
+
+        //Find alerter location and start tracking
+        $scope.alerterLoc= $scope.findAlerterLocation(alerterId);
+        if($scope.alerterLoc){
+          $scope.alerterPageMarkers[1].latitude=$scope.alerterLoc.latitude;
+          $scope.alerterPageMarkers[1].longitude=$scope.alerterLoc.longitude;
+          $scope.alerterPageMarkers[1].icon= { url: "img/Help.png"};
+          $scope.calculateAndDisplayRoute();
+        }
+      };
+
       var allIncidentMarkers=[];
       $scope.respTrackPageMarkers=[
         {"id":"alerter","title":"alerter","icon":"img/Help.png"},
@@ -160,16 +193,21 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
             origin: new google.maps.Point(0,0), // origin
             anchor: new google.maps.Point(0, 0) // anchor
         };
-        $scope.alerterPageMarkers.push({
-          "id": "alerterMain",
-          "latitude": position.coords.latitude,
-          "longitude": position.coords.longitude,
-          "icon":icon
-        });
         $scope.myLat= position.coords.latitude;
         $scope.myLong= position.coords.longitude;
-        $scope.respTrackPageMarkers[0].latitude= position.coords.latitude;
-        $scope.respTrackPageMarkers[0].longitude= position.coords.longitude;
+
+        //TODO: remove the following location mocker
+        $scope.myLat= $scope.getRandLocation(12.7226855, 13.1725508, 77.38986019999993, 77.61422579999999).latitude;
+        $scope.myLong= $scope.getRandLocation(12.7226855, 13.1725508, 77.38986019999993, 77.61422579999999).longitude;
+
+        $scope.alerterPageMarkers.push({
+          "id": "alerterMain",
+          "latitude": $scope.myLat,
+          "longitude": $scope.myLong,
+          "icon":icon
+        });
+        $scope.respTrackPageMarkers[0].latitude= $scope.myLat;
+        $scope.respTrackPageMarkers[0].longitude= $scope.myLong;
 
         //send location information to the server
         responderSocket.emit('responder-information', 
@@ -223,6 +261,22 @@ angular.module('starter.controllers', ['SAS.services', 'uiGmapgoogle-maps', 'ngG
         $scope.allIncidentMarkers= allIncidentMarkers;
       });
       
+      return uiGmapIsReady.promise(1);
+    }).then(function(instances){
+
+      var instanceMap = instances[0].map;
+      $scope.directionsDisplay.setMap(instanceMap);
+      $scope.calculateAndDisplayRoute= function(){
+        $scope.directionsService.route({
+              origin: new google.maps.LatLng($scope.myLat, $scope.myLong),
+              destination: new google.maps.LatLng($scope.alerterLoc.latitude, $scope.alerterLoc.longitude),
+              travelMode: google.maps.TravelMode.DRIVING
+            }, function(response, status) {
+            if (status == google.maps.DirectionsStatus.OK) {
+                $scope.directionsDisplay.setDirections(response);
+            }
+        });   
+      };
     });
 
 });
