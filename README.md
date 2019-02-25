@@ -25,4 +25,3 @@ Following services can be created as modules and developed independently:
 ### Contributors ###
 
 * Ayush Gera
-* Gaurav Pahuja
